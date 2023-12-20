@@ -5,13 +5,14 @@
 //  Created by Pujun Lun on 12/19/23.
 //
 
-#import <Foundation/Foundation.h>
-
 #import "HIDManager.h"
+
+#import <Foundation/Foundation.h>
 
 @interface HIDManager ()
 
 - (BOOL)isRunning;
+- (id<HIDManagerDelegate>)delegate;
 
 @end
 
@@ -24,20 +25,20 @@
 static void handleInputValue(void* ctx, IOReturn inResult, void* inSender,
                              IOHIDValueRef value) {
   HIDManager* self = (__bridge HIDManager*)ctx;
-  [self->_delegate HIDManager:self valueChanged:value];
+  [self.delegate HIDManager:self valueChanged:value];
 }
 
 static void handleDeviceAdded(void* ctx, IOReturn inResult, void* inSender,
                               IOHIDDeviceRef device) {
   HIDManager* self = (__bridge HIDManager*)ctx;
-  [self->_delegate HIDManager:self deviceAdded:device];
+  [self.delegate HIDManager:self deviceAdded:device];
   IOHIDDeviceRegisterInputValueCallback(device, handleInputValue, ctx);
 }
 
 static void handleDeviceRemoved(void* ctx, IOReturn inResult, void* inSender,
                                 IOHIDDeviceRef device) {
   HIDManager* self = (__bridge HIDManager*)ctx;
-  [self->_delegate HIDManager:self deviceRemoved:device];
+  [self.delegate HIDManager:self deviceRemoved:device];
 }
 
 - (id)initWithCriteria:(NSArray*)criteria
@@ -100,6 +101,10 @@ static void handleDeviceRemoved(void* ctx, IOReturn inResult, void* inSender,
 
 - (BOOL)isRunning {
   return !!_manager;
+}
+
+- (id<HIDManagerDelegate>)delegate {
+  return _delegate;
 }
 
 @end

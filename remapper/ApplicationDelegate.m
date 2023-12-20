@@ -7,14 +7,18 @@
 
 #import "ApplicationDelegate.h"
 
-#import "InputController.h"
-
 @implementation ApplicationDelegate {
   InputController* _inputController;
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification*)notification {
-  _inputController = [InputController new];
+  _inputController = [[InputController alloc] initWithDelegate:self];
+}
+
+#pragma mark InputControllerDelegate
+
+- (void)inputController:(InputController*)controller didError:(NSError*)error {
+  NSLog(@"Received input controller error");
 }
 
 @end

@@ -10,83 +10,53 @@
 #import <CoreVideo/CoreVideo.h>
 #import <IOKit/hid/IOHIDLib.h>
 
+#import "InputDevice.h"
+
 @interface InputController ()
 
 - (BOOL)createDisplayLink;
-- (BOOL)setDisplayLinkOutputCallback;
-- (NSError*)notifyErrorFromReturnCode:(CVReturn)code;
+- (void)startHIDManager;
 
 @end
 
 @implementation InputController {
   CVDisplayLinkRef _displayLink;
   HIDManager* _HIDManager;
+  NSMutableDictionary<NSString*, InputDevice*>* _inputDevices;
   id<InputControllerDelegate> _delegate;
 }
 
-static CVReturn updateDirectLink(CVDisplayLinkRef displayLink,
-                                 const CVTimeStamp* inNow,
-                                 const CVTimeStamp* inOutputTime,
-                                 CVOptionFlags flagsIn, CVOptionFlags* flagsOut,
-                                 void* ctxManager) {
-  return kCVReturnSuccess;
-}
-
-- (id)init {
-  self = [super init];
-  if (self == nil || ![self createDisplayLink] ||
-      ![self setDisplayLinkOutputCallback]) {
-    return nil;
+- (id)initWithDelegate:(id<InputControllerDelegate>)delegate {
+  if ((self = [super init]) && [self createDisplayLink]) {
+    [self startHIDManager];
+    _inputDevices = [NSMutableDictionary new];
+    _delegate = delegate;
   }
-
-  _HIDManager = [[HIDManager alloc] initWithCriteria:@[
-    @{
-      @(kIOHIDDeviceUsagePageKey) : @(kHIDPage_GenericDesktop),
-      @(kIOHIDDeviceUsageKey) : @(kHIDUsage_GD_Joystick)
-    },
-    @{
-      @(kIOHIDDeviceUsagePageKey) : @(kHIDPage_GenericDesktop),
-      @(kIOHIDDeviceUsageKey) : @(kHIDUsage_GD_GamePad)
-    },
-    @{
-      @(kIOHIDDeviceUsagePageKey) : @(kHIDPage_GenericDesktop),
-      @(kIOHIDDeviceUsageKey) : @(kHIDUsage_GD_MultiAxisController)
-    }
-  ]
-                                            delegate:self];
-  [_HIDManager start];
-
   return self;
 }
 
 - (BOOL)createDisplayLink {
   CVReturn ret = CVDisplayLinkCreateWithActiveCGDisplays(&_displayLink);
-  NSError* error = [self notifyErrorFromReturnCode:ret];
-  if (error != nil) {
+  if (ret != kCVReturnSuccess) {
+    NSError* error = [NSError errorWithDomain:NSCocoaErrorDomain
+                                         code:ret
+                                     userInfo:nil];
+    [_delegate inputController:self didError:error];
     NSLog(@"Failed to create DisplayLink: %@", error);
     return FALSE;
   }
   return TRUE;
 }
 
-- (BOOL)setDisplayLinkOutputCallback {
-  CVReturn ret = CVDisplayLinkSetOutputCallback(_displayLink, updateDirectLink,
-                                                (__bridge void*)self);
-  NSError* error = [self notifyErrorFromReturnCode:ret];
-  if (error != nil) {
-    NSLog(@"Failed to set callback for DisplayLink: %@", error);
-    return FALSE;
-  }
-  return TRUE;
-}
-
-- (NSError*)notifyErrorFromReturnCode:(CVReturn)code {
-  NSError* error = nil;
-  if (code != kCVReturnSuccess) {
-    error = [NSError errorWithDomain:NSCocoaErrorDomain code:code userInfo:nil];
-    [_delegate inputController:self didError:error];
-  }
-  return error;
+- (void)startHIDManager {
+  _HIDManager = [[HIDManager alloc] initWithCriteria:@[
+    @{
+      @(kIOHIDDeviceUsagePageKey) : @(kHIDPage_GenericDesktop),
+      @(kIOHIDDeviceUsageKey) : @(kHIDUsage_GD_Joystick)
+    },
+  ]
+                                            delegate:self];
+  [_HIDManager start];
 }
 
 #pragma mark HIDManagerDelegate
@@ -99,19 +69,40 @@ static CVReturn updateDirectLink(CVDisplayLinkRef displayLink,
   NSLog(@"Stopped HID manager");
 }
 
-- (void)HIDManager:(id)manager deviceAdded:(IOHIDDeviceRef)device {
-  NSLog(@"Device added");
+- (void)HIDManager:(id)manager deviceAdded:(IOHIDDeviceRef)deviceRef {
+  InputDevice* device = [[InputDevice alloc] initWithDevice:deviceRef];
+  NSString* uid = device.uid;
+  if (_inputDevices[uid]) {
+    NSLog(@"Cannot add duplicated device '%@'", uid);
+  } else {
+    _inputDevices[uid] = device;
+    NSLog(@"Added device '%@'", uid);
+  }
 }
 
-- (void)HIDManager:(id)manager deviceRemoved:(IOHIDDeviceRef)device {
-  NSLog(@"Device removed");
+- (void)HIDManager:(id)manager deviceRemoved:(IOHIDDeviceRef)deviceRef {
+  InputDevice* device = [[InputDevice alloc] initWithDevice:deviceRef];
+  NSString* uid = device.uid;
+  if (_inputDevices[uid]) {
+    [_inputDevices removeObjectForKey:uid];
+    NSLog(@"Removed device '%@'", uid);
+  } else {
+    NSLog(@"Device '%@' not found, cannot remove", uid);
+  }
 }
 
 - (void)HIDManager:(HIDManager*)manager valueChanged:(IOHIDValueRef)value {
+  IOHIDElementRef element = value ? IOHIDValueGetElement(value) : NULL;
+  IOHIDDeviceRef deviceRef = element ? IOHIDElementGetDevice(element) : NULL;
+  InputDevice* device = [[InputDevice alloc] initWithDevice:deviceRef];
+  if (_inputDevices[device.uid]) {
+    uint32_t usage = IOHIDElementGetUsage(element);
+    NSLog(@"Input usage %u value %ld", usage, IOHIDValueGetIntegerValue(value));
+  }
 }
 
 - (void)HIDManager:(HIDManager*)manager didError:(NSError*)error {
-  NSLog(@"Received HID error");
+  NSLog(@"Received HID manager error");
 }
 
 @end

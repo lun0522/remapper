@@ -11,16 +11,21 @@
 		048633092B318F54004ADBCC /* ApplicationDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 048633082B318F54004ADBCC /* ApplicationDelegate.m */; };
 		0486330D2B319781004ADBCC /* InputController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0486330C2B319781004ADBCC /* InputController.m */; };
 		048633102B3213A6004ADBCC /* HIDManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0486330F2B3213A6004ADBCC /* HIDManager.m */; };
+		048633172B324813004ADBCC /* InputDevice.m in Sources */ = {isa = PBXBuildFile; fileRef = 048633162B324813004ADBCC /* InputDevice.m */; };
+		0486331A2B325746004ADBCC /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 048633192B325746004ADBCC /* IOKit.framework */; };
+		0486331C2B325772004ADBCC /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0486331B2B325772004ADBCC /* CoreVideo.framework */; };
+		0486331E2B325782004ADBCC /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0486331D2B325782004ADBCC /* Foundation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		048632FC2B318A9A004ADBCC /* CopyFiles */ = {
+		048632FC2B318A9A004ADBCC /* Copy Files */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = /usr/share/man/man1/;
 			dstSubfolderSpec = 0;
 			files = (
 			);
+			name = "Copy Files";
 			runOnlyForDeploymentPostprocessing = 1;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -35,6 +40,8 @@
 		0486330E2B3197E9004ADBCC /* HIDManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HIDManager.h; sourceTree = "<group>"; };
 		0486330F2B3213A6004ADBCC /* HIDManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HIDManager.m; sourceTree = "<group>"; };
 		048633142B3238CF004ADBCC /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		048633152B324802004ADBCC /* InputDevice.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = InputDevice.h; sourceTree = "<group>"; };
+		048633162B324813004ADBCC /* InputDevice.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = InputDevice.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -42,6 +49,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0486331C2B325772004ADBCC /* CoreVideo.framework in Frameworks */,
+				0486331E2B325782004ADBCC /* Foundation.framework in Frameworks */,
+				0486331A2B325746004ADBCC /* IOKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -54,6 +64,7 @@
 				048633142B3238CF004ADBCC /* README.md */,
 				048633002B318A9A004ADBCC /* remapper */,
 				048632FF2B318A9A004ADBCC /* Products */,
+				048633182B325746004ADBCC /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -75,6 +86,8 @@
 				0486330C2B319781004ADBCC /* InputController.m */,
 				0486330E2B3197E9004ADBCC /* HIDManager.h */,
 				0486330F2B3213A6004ADBCC /* HIDManager.m */,
+				048633152B324802004ADBCC /* InputDevice.h */,
+				048633162B324813004ADBCC /* InputDevice.m */,
 			);
 			path = remapper;
 			sourceTree = "<group>";
@@ -88,7 +101,7 @@
 			buildPhases = (
 				048632FA2B318A9A004ADBCC /* Sources */,
 				048632FB2B318A9A004ADBCC /* Frameworks */,
-				048632FC2B318A9A004ADBCC /* CopyFiles */,
+				048632FC2B318A9A004ADBCC /* Copy Files */,
 			);
 			buildRules = (
 			);
@@ -140,6 +153,7 @@
 				048633092B318F54004ADBCC /* ApplicationDelegate.m in Sources */,
 				0486330D2B319781004ADBCC /* InputController.m in Sources */,
 				048633102B3213A6004ADBCC /* HIDManager.m in Sources */,
+				048633172B324813004ADBCC /* InputDevice.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,6 +280,10 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
+				);
 			};
 			name = Debug;
 		};
@@ -274,6 +292,10 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SYSTEM_FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
+				);
 			};
 			name = Release;
 		};

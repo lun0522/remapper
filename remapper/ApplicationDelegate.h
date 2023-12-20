@@ -11,7 +11,9 @@
 #import <AppKit/AppKit.h>
 #import <Foundation/Foundation.h>
 
-@interface ApplicationDelegate : NSObject
+#import "InputController.h"
+
+@interface ApplicationDelegate : NSObject <InputControllerDelegate>
 
 - (void)applicationWillFinishLaunching:(NSNotification*)notification;
 

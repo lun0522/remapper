@@ -15,6 +15,8 @@
 
 @interface InputController : NSObject <HIDManagerDelegate>
 
+- (id)initWithDelegate:(id<InputControllerDelegate>)delegate;
+
 @end
 
 @protocol InputControllerDelegate
